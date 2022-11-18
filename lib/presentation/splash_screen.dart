@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../internal/navigation.dart';
+import '../not_connection/nc_navigation.dart';
 import 'home.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -68,7 +69,7 @@ class _SplashScreenState extends State<SplashScreen> {
               child: const Text('Ok'),
               onPressed: () {
                 Navigator.pushReplacement(
-                    context, MaterialPageRoute(builder: (context) => Navigation()));
+                    context, MaterialPageRoute(builder: (context) => NoConnectionNavigation()));
               },
             ),
           ],

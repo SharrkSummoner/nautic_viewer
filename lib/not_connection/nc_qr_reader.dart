@@ -6,17 +6,17 @@ import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../internal/local_files.dart';
-import 'documentfromscanner.dart';
-import 'home.dart';
+import '../presentation/documentfromscanner.dart';
+import 'nc_document.dart';
 
-class QrReader extends StatefulWidget {
-  const QrReader({Key? key}) : super(key: key);
+class NoConnectionQrReader extends StatefulWidget {
+  const NoConnectionQrReader({Key? key}) : super(key: key);
 
   @override
-  State<QrReader> createState() => _QrReaderState();
+  State<NoConnectionQrReader> createState() => _NoConnectionQrReaderState();
 }
 
-class _QrReaderState extends State<QrReader> {
+class _NoConnectionQrReaderState extends State<NoConnectionQrReader> {
   Barcode? barcode;
   QRViewController? controller;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
@@ -143,7 +143,7 @@ class _QrReaderState extends State<QrReader> {
             Navigator.of(context)
                 .push(MaterialPageRoute(
                     builder: (context) =>
-                        Document(url: barcode.code.toString())))
+                        NoConnectionDocument(url: barcode.code.toString())))
                 .then((value) => controller.resumeCamera());
           } else {
             await _dialogBuilder(context);

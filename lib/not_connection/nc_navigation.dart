@@ -1,20 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:nautic_viewer/presentation/qr_reader.dart';
-import 'package:nautic_viewer/presentation/select_spool.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 
-import '../presentation/home.dart';
-import '../presentation/settings.dart';
+import 'nc_home.dart';
+import 'nc_qr_reader.dart';
 
-class Navigation extends StatefulWidget {
-  const Navigation({Key? key}) : super(key: key);
+class NoConnectionNavigation extends StatefulWidget {
+  const NoConnectionNavigation({Key? key}) : super(key: key);
 
   @override
-  State<Navigation> createState() => _NavigationState();
+  State<NoConnectionNavigation> createState() => _NoConnectionNavigationState();
 }
 
-class _NavigationState extends State<Navigation> {
+class _NoConnectionNavigationState extends State<NoConnectionNavigation> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   var titleAppBar = Text("Nautic 3D");
   var _currentIndex = 0;
@@ -22,12 +20,8 @@ class _NavigationState extends State<Navigation> {
   late TabController _tabController;
 
   final _kTabPages = <Widget>[
-    Home(),
-    QrReader(),
-    SelectSpool(
-      docNumber: "210101-819-0001",
-    ),
-    Settings()
+    NoConnectionHome(),
+    NoConnectionQrReader(),
   ];
 
   final _kBottomNavBarItems = <SalomonBottomBarItem>[
@@ -38,15 +32,7 @@ class _NavigationState extends State<Navigation> {
     SalomonBottomBarItem(
         icon: Icon(Icons.qr_code_scanner),
         title: Text("QR scanner"),
-        selectedColor: Color.fromARGB(255, 119, 134, 233)),
-    SalomonBottomBarItem(
-        icon: Icon(Icons.directions_boat),
-        title: Text("Documents"),
-        selectedColor: Color.fromARGB(255, 119, 134, 233)),
-    SalomonBottomBarItem(
-        icon: Icon(Icons.settings),
-        title: Text("Settings"),
-        selectedColor: Color.fromARGB(255, 119, 134, 233)),
+        selectedColor: Color.fromARGB(255, 119, 134, 233))
   ];
 
   @override

@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:convert' show utf8;
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gl/flutter_gl.dart';
@@ -14,16 +16,16 @@ import 'package:three_dart_jsm/three_dart_jsm.dart' as three_jsm;
 
 import '../data/api/zipobject_services.dart';
 
-class ThreeRender extends StatefulWidget {
-  ThreeRender({Key? key, required this.url}) : super(key: key);
+class RayCast extends StatefulWidget {
+  RayCast({Key? key, required this.url}) : super(key: key);
 
   String url;
 
   @override
-  State<ThreeRender> createState() => _ThreeRender();
+  State<RayCast> createState() => _RayCast();
 }
 
-class _ThreeRender extends State<ThreeRender> {
+class _RayCast extends State<RayCast> {
   List<String> spoolsList = List<String>.empty(growable: true);
 
   final GlobalKey<three_jsm.DomLikeListenableState> _globalKey =
@@ -35,10 +37,15 @@ class _ThreeRender extends State<ThreeRender> {
   late three_jsm.OrbitControls controls;
   late three.AxesHelper axes;
 
+  late three.EventDispatcher event;
+
   late double width;
   late double height;
 
   Size? screenSize;
+
+  three.Raycaster raycaster = three.Raycaster();
+  three.Vector2 pointer = three.Vector2();
 
   late three.Scene scene;
   late three.Camera camera;
@@ -61,12 +68,14 @@ class _ThreeRender extends State<ThreeRender> {
 
   var localToCameraAxesPlacement;
   var data;
-  var currentSpoolIndex;
+  late int currentSpoolIndex;
   var currentSpool;
   var currentDocNumber;
-  var nextSpoolIndex;
-  var previousSpoolIndex;
+  late int nextSpoolIndex;
+  late int previousSpoolIndex;
   var addingSpool;
+
+  late Offset _tapPosition;
 
   @override
   void initState() {
@@ -103,7 +112,7 @@ class _ThreeRender extends State<ThreeRender> {
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(appBarHeight),
           child: AppBar(
-            title: Text("3D viewer"),
+            title: Text("Test"),
           ),
         ),
         body: Builder(
@@ -244,10 +253,19 @@ class _ThreeRender extends State<ThreeRender> {
     );
   }
 
+  // onPointerMove(details) {
+  //
+  //   setState(() {
+  //     print("double tap");
+  //     pointer.x = (details.globalPosition.dx / width) * 2.0 -1;
+  //     pointer.y = -(details.globalPosition.dy / height) * 2.0 + 1;
+  //     print("${pointer.x}");
+  //     print("${pointer.y}");
+  //     render(ev: "double tap");
+  //   });
+  // }
+
   onPointer(details) {
-    setState(() {
-      state = false;
-    });
     var x = (details.globalPosition.dx / screenSize!.width) * 2 - 1.1;
     var y = -(details.globalPosition.dy / screenSize!.height) * 2 + 1.1;
     var dir = three.Vector3(x, y);
@@ -256,7 +274,7 @@ class _ThreeRender extends State<ThreeRender> {
     dir.unproject(camera);
 
     var ray =
-    three.Raycaster(camera.position, dir.sub(camera.position).normalize());
+        three.Raycaster(camera.position, dir.sub(camera.position).normalize());
     var intersects = ray.intersectObjects(scene.children, true);
 
     if (intersects.isNotEmpty) {
@@ -265,7 +283,6 @@ class _ThreeRender extends State<ThreeRender> {
         intersects[0].object.material.color.set(0xff0000);
       }
     }
-    state = true;
   }
 
   nextSpool() {
@@ -403,7 +420,7 @@ class _ThreeRender extends State<ThreeRender> {
     initPlatformState();
   }
 
-  render() {
+  render({String ev = ""}) {
     final gl = three3dRender.gl;
 
     camera.updateMatrixWorld();
@@ -460,7 +477,7 @@ class _ThreeRender extends State<ThreeRender> {
     scene = three.Scene();
 
     camera = three.PerspectiveCamera(50, aspect, 1, 10000);
-    camera.position.set(0, 1, 0);
+    camera.position.set(0, -1, 0);
     scene.add(camera);
     scene.background = three.Color(0xA6A6A6);
 
@@ -492,10 +509,6 @@ class _ThreeRender extends State<ThreeRender> {
     loadObjFromZip();
 
     animate();
-  }
-
-  myOnMouseDownFunction(evt) {
-    print("click $evt");
   }
 
   addObjScene() {

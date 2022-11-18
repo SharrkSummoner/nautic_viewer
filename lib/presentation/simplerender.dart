@@ -14,16 +14,16 @@ import 'package:three_dart_jsm/three_dart_jsm.dart' as three_jsm;
 
 import '../data/api/zipobject_services.dart';
 
-class ThreeRender extends StatefulWidget {
-  ThreeRender({Key? key, required this.url}) : super(key: key);
+class SimpleRender extends StatefulWidget {
+  SimpleRender({Key? key, required this.url}) : super(key: key);
 
   String url;
 
   @override
-  State<ThreeRender> createState() => _ThreeRender();
+  State<SimpleRender> createState() => _SimpleRender();
 }
 
-class _ThreeRender extends State<ThreeRender> {
+class _SimpleRender extends State<SimpleRender> {
   List<String> spoolsList = List<String>.empty(growable: true);
 
   final GlobalKey<three_jsm.DomLikeListenableState> _globalKey =
@@ -46,6 +46,7 @@ class _ThreeRender extends State<ThreeRender> {
   late three.Group group;
 
   three.Box3 boundingBox = three.Box3();
+  three.Box3 centerBox = three.Box3();
 
   num aspect = 2.0;
   double dpr = 1.0;
@@ -61,32 +62,19 @@ class _ThreeRender extends State<ThreeRender> {
 
   var localToCameraAxesPlacement;
   var data;
-  var currentSpoolIndex;
-  var currentSpool;
   var currentDocNumber;
-  var nextSpoolIndex;
-  var previousSpoolIndex;
-  var addingSpool;
 
   @override
   void initState() {
     super.initState();
     data = getData(widget.url);
     currentDocNumber = data[0];
-    currentSpool = data[1];
-    addingSpool = currentSpool;
 
     parseSpool(currentDocNumber).then((value) => {
           setState(() {
             value.forEach((element) {
               spoolsList.add(element);
             });
-            currentSpoolIndex = spoolsList.indexOf(currentSpool);
-            nextSpoolIndex = currentSpoolIndex;
-            previousSpoolIndex = currentSpoolIndex;
-
-            print(spoolsList);
-            print("Current spool index is $currentSpoolIndex");
           })
         });
 
@@ -97,7 +85,6 @@ class _ThreeRender extends State<ThreeRender> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onDoubleTap: () {},
-      onDoubleTapDown: (details) => onPointer(details),
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: PreferredSize(
@@ -154,79 +141,9 @@ class _ThreeRender extends State<ThreeRender> {
                           child: Column(
                             children: <Widget>[
                               Text("Document: $currentDocNumber"),
-                              Text("Spool: $currentSpool"),
-                              Text("Adding spool: $addingSpool")
                             ],
                           ),
                         ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          mainAxisSize: MainAxisSize.max,
-                          children: <Widget>[
-                            SizedBox(
-                                height: height * 4.5 / 10.0,
-                                width: width * 0.1,
-                                child: TextButton(
-                                  onPressed: () => previousSpool(),
-                                  child: RotatedBox(
-                                    quarterTurns: 1,
-                                    child: Text("Previous"),
-                                  ),
-                                  style: TextButton.styleFrom(
-                                    primary: Colors.black,
-                                    onSurface: Colors.white,
-                                  ),
-                                )),
-                            SizedBox(
-                                height: height * 4.5 / 10.0,
-                                width: width * 0.1,
-                                child: TextButton(
-                                  onPressed: () => nextSpool(),
-                                  child: RotatedBox(
-                                    quarterTurns: 1,
-                                    child: Text("Next"),
-                                  ),
-                                  style: TextButton.styleFrom(
-                                    primary: Colors.black,
-                                    onSurface: Colors.white,
-                                  ),
-                                )),
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          mainAxisSize: MainAxisSize.max,
-                          children: <Widget>[
-                            SizedBox(
-                                height: height * 4.5 / 10.0,
-                                width: width * 0.1,
-                                child: TextButton(
-                                  onPressed: () => addPreviousSpool(),
-                                  child: RotatedBox(
-                                    quarterTurns: 1,
-                                    child: Text("Add previous"),
-                                  ),
-                                  style: TextButton.styleFrom(
-                                    primary: Colors.black,
-                                    onSurface: Colors.white,
-                                  ),
-                                )),
-                            SizedBox(
-                                height: height * 4.5 / 10.0,
-                                width: width * 0.1,
-                                child: TextButton(
-                                  onPressed: () => addNextSpool(),
-                                  child: RotatedBox(
-                                    quarterTurns: 1,
-                                    child: Text("Add next"),
-                                  ),
-                                  style: TextButton.styleFrom(
-                                    primary: Colors.black,
-                                    onSurface: Colors.white,
-                                  ),
-                                )),
-                          ],
-                        )
                       ],
                     )
                   : Container(
@@ -241,125 +158,6 @@ class _ThreeRender extends State<ThreeRender> {
           ],
         ),
       ],
-    );
-  }
-
-  onPointer(details) {
-    setState(() {
-      state = false;
-    });
-    var x = (details.globalPosition.dx / screenSize!.width) * 2 - 1.1;
-    var y = -(details.globalPosition.dy / screenSize!.height) * 2 + 1.1;
-    var dir = three.Vector3(x, y);
-    print(x);
-    print(y);
-    dir.unproject(camera);
-
-    var ray =
-    three.Raycaster(camera.position, dir.sub(camera.position).normalize());
-    var intersects = ray.intersectObjects(scene.children, true);
-
-    if (intersects.isNotEmpty) {
-      print("hit");
-      for (var i = 0; i < intersects.length; i++) {
-        intersects[0].object.material.color.set(0xff0000);
-      }
-    }
-    state = true;
-  }
-
-  nextSpool() {
-    setState(() {
-      state = false;
-      currentSpoolIndex = checkNextSpool(++currentSpoolIndex);
-      print(currentSpoolIndex);
-      data[1] = spoolsList[currentSpoolIndex];
-      if (currentSpool != data[1]) {
-        currentSpool = data[1];
-        nextSpoolIndex = currentSpoolIndex;
-        previousSpoolIndex = currentSpoolIndex;
-        addingSpool = currentSpool;
-        widget.url = getUrl(data);
-        replaceObjScene();
-        print(widget.url);
-      } else {
-        state = true;
-      }
-    });
-  }
-
-  previousSpool() {
-    setState(() {
-      state = false;
-      currentSpoolIndex = checkPreviousSpool(--currentSpoolIndex);
-      print(currentSpoolIndex);
-      data[1] = spoolsList[currentSpoolIndex];
-      if (currentSpool != data[1]) {
-        currentSpool = data[1];
-        nextSpoolIndex = currentSpoolIndex;
-        previousSpoolIndex = currentSpoolIndex;
-        addingSpool = currentSpool;
-        widget.url = getUrl(data);
-        replaceObjScene();
-        print(widget.url);
-      } else {
-        state = true;
-      }
-    });
-  }
-
-  addNextSpool() {
-    setState(() {
-      state = false;
-      nextSpoolIndex = checkNextSpool(++nextSpoolIndex);
-      print(nextSpoolIndex);
-      data[1] = spoolsList[nextSpoolIndex];
-      if (addingSpool != data[1]) {
-        addingSpool = data[1];
-        widget.url = getUrl(data);
-        addObjScene();
-        print(widget.url);
-      } else {
-        state = true;
-      }
-    });
-  }
-
-  addPreviousSpool() {
-    setState(() {
-      state = false;
-      previousSpoolIndex = checkPreviousSpool(--previousSpoolIndex);
-      print(previousSpoolIndex);
-      data[1] = spoolsList[previousSpoolIndex];
-      if (addingSpool != data[1]) {
-        addingSpool = data[1];
-        widget.url = getUrl(data);
-        addObjScene();
-        print(widget.url);
-      } else {
-        state = true;
-      }
-    });
-  }
-
-  checkNextSpool(int index) {
-    if (index == spoolsList.length) index = spoolsList.length - 1;
-    return index;
-  }
-
-  checkPreviousSpool(int index) {
-    if (index < 0) index = 0;
-    return index;
-  }
-
-  void _showToast(BuildContext context) {
-    final scaffold = ScaffoldMessenger.of(context);
-    scaffold.showSnackBar(
-      SnackBar(
-        content: const Text('Added to favorite'),
-        action: SnackBarAction(
-            label: 'UNDO', onPressed: scaffold.hideCurrentSnackBar),
-      ),
     );
   }
 
@@ -516,42 +314,42 @@ class _ThreeRender extends State<ThreeRender> {
     bool first = true;
 
     fetchFiles(widget.url).then((archive) => {
-          // scene.clear(),
-          setState(() {
-            group = three.Group();
-            var archiveFiles = 0;
-            archive.files.forEach((file) {
-              var decode = utf8.decode(file.content);
-              List<String> split;
-              List<String> formatted = List.empty(growable: true);
-              decode.split('\n').forEach((line) => {
-                    split = line.split(' '),
-                    if (split.isNotEmpty && split.elementAt(0) == 'v')
-                      {formatted.add(line)}
-                    else if (split.isNotEmpty && split.elementAt(0) == 'f')
-                      {
-                        formatted.add(List.from([
-                          'f',
-                          split.elementAt(1).replaceAll("/", "//"),
-                          split.elementAt(2).replaceAll("/", "//"),
-                          split.elementAt(3).replaceAll("/", "//")
-                        ]).join(' ')),
-                      }
-                    else if (line.trim() == "")
-                      {}
-                    else
-                      {formatted.add(line)}
-                  });
+      // scene.clear(),
+      setState(() {
+        group = three.Group();
+        var archiveFiles = 0;
+        archive.files.forEach((file) {
+          var decode = utf8.decode(file.content);
+          List<String> split;
+          List<String> formatted = List.empty(growable: true);
+          decode.split('\n').forEach((line) => {
+            split = line.split(' '),
+            if (split.isNotEmpty && split.elementAt(0) == 'v')
+              {formatted.add(line)}
+            else if (split.isNotEmpty && split.elementAt(0) == 'f')
+              {
+                formatted.add(List.from([
+                  'f',
+                  split.elementAt(1).replaceAll("/", "//"),
+                  split.elementAt(2).replaceAll("/", "//"),
+                  split.elementAt(3).replaceAll("/", "//")
+                ]).join(' ')),
+              }
+            else if (line.trim() == "")
+                {}
+              else
+                {formatted.add(line)}
+          });
 
-              (loader.parse(formatted.join('\n')) as Future<dynamic>)
-                  .then((model) => {
-                        group.add(model),
-                        if (++archiveFiles == archive.files.length)
-                          {scene.add(group), setView(group)}
-                      });
-            });
-          })
+          (loader.parse(formatted.join('\n')) as Future<dynamic>)
+              .then((model) => {
+            group.add(model),
+            if (++archiveFiles == archive.files.length)
+              {scene.add(group), setView(group)}
+          });
         });
+      })
+    });
   }
 
   setView(three.Object3D object) {

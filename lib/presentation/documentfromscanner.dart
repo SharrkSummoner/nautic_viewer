@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:nautic_viewer/presentation/render.dart';
 import 'package:nautic_viewer/presentation/select_spool.dart';
+import 'package:nautic_viewer/presentation/simplerender.dart';
 
 import '../data/api/zipobject_services.dart';
 import '../internal/scandata.dart';
@@ -35,7 +36,7 @@ class _DocumentState extends State<Document> {
         ? Scaffold(
             body: Center(
                 child: LoadingAnimationWidget.threeArchedCircle(
-                    color: Colors.deepPurple,
+                    color: Color.fromARGB(255, 119, 134, 233),
                     size: MediaQuery.of(context).size.width * 0.2)),
           )
         : Scaffold(
@@ -89,7 +90,13 @@ class _DocumentState extends State<Document> {
                     height: MediaQuery.of(context).size.height * 0.07,
                     width: MediaQuery.of(context).size.width * 0.9,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        setState(() {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) =>
+                                  SimpleRender(url: getUrl(["${data[0]}", "full", "${data[2]}"]))));
+                        });
+                      },
                       child: Text("Display all spools"),
                       style: ElevatedButton.styleFrom(
                           textStyle: TextStyle(fontSize: 20)),

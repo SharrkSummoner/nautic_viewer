@@ -1,21 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:nautic_viewer/presentation/render.dart';
 
 import '../data/api/zipobject_services.dart';
 import '../internal/local_files.dart';
 import '../internal/scandata.dart';
-import 'documentfromscanner.dart';
-import 'double_camera.dart';
 
-class Home extends StatefulWidget {
-  const Home({Key? key}) : super(key: key);
+class NoConnectionHome extends StatefulWidget {
+  const NoConnectionHome({Key? key}) : super(key: key);
 
   @override
-  State<Home> createState() => _HomeState();
+  State<NoConnectionHome> createState() => _NoConnectionHomeState();
 }
 
-class _HomeState extends State<Home> {
+class _NoConnectionHomeState extends State<NoConnectionHome> {
   String url = "";
   late Future<dynamic> urlFuture = getLastScanUrl();
 
@@ -27,8 +24,6 @@ class _HomeState extends State<Home> {
           url = value;
         }));
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +57,7 @@ class _HomeState extends State<Home> {
                       borderRadius: BorderRadius.circular(50)),
                   alignment: Alignment.center,
                   child: !validateUrl(url)
-                      ?  Column(
+                      ? Column(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: <Widget>[
                               Text("Your last scan data",
@@ -85,40 +80,6 @@ class _HomeState extends State<Home> {
                             ScanData(
                               url: url,
                             ),
-                            SizedBox(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.07,
-                                width: MediaQuery.of(context).size.width * 0.7,
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      Navigator.of(context).push(
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  ThreeRender(url: url)));
-                                    });
-                                  },
-                                  child: Text("Display this spool"),
-                                  style: ElevatedButton.styleFrom(
-                                      textStyle: TextStyle(fontSize: 20)),
-                                )),
-                            SizedBox(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.07,
-                                width: MediaQuery.of(context).size.width * 0.7,
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      Navigator.of(context).push(
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  Document(url: url)));
-                                    });
-                                  },
-                                  child: Text("Document information"),
-                                  style: ElevatedButton.styleFrom(
-                                      textStyle: TextStyle(fontSize: 20)),
-                                ))
                           ],
                         ),
                 ),

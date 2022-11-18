@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../palette/palette.dart';
 import '../presentation/splash_screen.dart';
 
 class Application extends StatelessWidget {
@@ -12,7 +13,7 @@ class Application extends StatelessWidget {
       theme: ThemeData(
           brightness: Brightness.light,
           primaryColor: Colors.white,
-          primarySwatch: Colors.deepPurple,
+          primarySwatch: Palette.kToLight,
           primaryColorLight: Colors.white,
           primaryColorDark: Colors.white,
           useMaterial3: true),

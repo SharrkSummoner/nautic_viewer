@@ -53,7 +53,7 @@ class _SelectSpool extends State<SelectSpool> {
           ? Scaffold(
               body: Center(
                   child: LoadingAnimationWidget.threeArchedCircle(
-                      color: Colors.deepPurple,
+                      color: Color.fromARGB(255, 119, 134, 233),
                       size: MediaQuery.of(context).size.width * 0.2)),
             )
           : Container(
